@@ -174,6 +174,29 @@ describe("Transaction", () => {
       });
   });
 
+  test("POST /transactions existing resource", async () => {
+    let agent = request(app.getHttpServer());
+    await agent
+      .post("/transactions")
+      .send(CREATE_INPUT)
+      .expect(HttpStatus.CREATED)
+      .expect({
+        ...CREATE_RESULT,
+        createdAt: CREATE_RESULT.createdAt.toISOString(),
+        date: CREATE_RESULT.date.toISOString(),
+        updatedAt: CREATE_RESULT.updatedAt.toISOString(),
+      })
+      .then(function () {
+        agent
+          .post("/transactions")
+          .send(CREATE_INPUT)
+          .expect(HttpStatus.CONFLICT)
+          .expect({
+            statusCode: HttpStatus.CONFLICT,
+          });
+      });
+  });
+
   afterAll(async () => {
     await app.close();
   });
